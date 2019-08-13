@@ -1,0 +1,155 @@
+.createForm{
+    margin-left:10px;
+    padding:20px 0;
+}
+.createForm .createFormRow{
+    clear:both;
+    margin-bottom:10px;
+    line-height:40px;
+}
+.createFormRow .createField{
+    float:left;
+    display: inline-block;
+    width:240px;
+    text-align:left;
+    vertical-align:top;
+}
+.createFormRow input.FieldValue{
+        /* margin-left: 10px; */
+    min-height: 36px;
+    border: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    width:40%;
+}
+.createFormRow div.FieldValue{
+    margin-left:250px;
+}
+.createFormRow .comboFieldSty{
+    display: inline-block;
+    height:36px;
+    line-height:36px;
+    margin-left:10px;
+    border:none;
+    -webkit-tap-highlight-color:transparent;
+    outline:none;
+}
+.iptText{
+    padding:0 5px;
+    width:400px;
+    height:36px;
+    line-height:36px;
+    border: 1px solid #e4e4e4!important;
+    font-size:12px;
+}
+/*create radio start*/
+.createForm input[type="radio"]{
+    display:none;
+}
+/*40 -20*/
+.createForm .dyRaio{
+    margin-right:40px;
+    cursor:pointer;
+    font-weight:inherit;
+}
+.createForm .dyRaio:before{
+    content:'';
+    margin-bottom: 14px;
+    margin-right:6px;
+    display: inline-block;
+    width:12px;
+    height:12px;
+    background: url('../images/iconBase.png') no-repeat -1px -38px;
+    vertical-align: bottom;
+}
+.createForm input[type="radio"]:checked + .dyRaio:before{
+    background: url('../images/iconBase.png') no-repeat -1px -51px;
+}
+/*create radio end*/
+
+/*check start*/
+.createForm input[type="checkbox"]{
+    display:none;
+}
+.dyCheck{
+    margin-right:40px;
+    cursor:pointer;
+    font-weight:inherit;
+}
+.dyCheck:before{
+    content:'';
+    display: inline-block;
+    margin-bottom: 14px;
+    margin-right:4px;
+    width:12px;
+    height:12px;
+    background: url('../images/iconBase.png') no-repeat -1px -65px;
+    cursor:pointer;
+    font-weight:inherit;
+    vertical-align: bottom;
+    z-index:1;
+}
+input[type="checkbox"]:checked + label:before{
+    background: url('../images/iconBase.png') no-repeat -1px -79px;
+}
+/*check end*/
+.relWrap{
+    display: inline-block;
+    position: relative;
+    margin-left: 10px;
+}
+.relWrap .textbox{
+    line-height:28px;
+    border-radius:0;
+    border:1px solid #979797;
+}
+.countWrap{
+    position: absolute;
+    bottom:10px;
+    left:590px;
+}
+.iptNum{
+    color:#f8453d;
+    font-style:normal;
+}
+.cover-btn{
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+.labelStyle{
+	width:125px;
+	text-align:right;
+}
+.iptStyle{
+	display:inline-block;
+	width:179px;
+}
+.textIndent2{
+    text-indent:2em;
+}
+.textIndent4{
+    text-indent:4em;
+}
+.textIndent6{
+    text-indent:6em;
+}
+.textIndent8{
+    text-indent:8em;
+}
+.textIndent10{
+    text-indent:10em;
+}
+.textIndent12{
+    text-indent:12em;
+}
+/*新添加样式*/
+.createFormRow .textbox{
+	width:40%!important;
+}
+/*COLOR*/
+.iptBgGrey{
+    background:rgb(243, 243, 239);
+    color:#808080;
+}
