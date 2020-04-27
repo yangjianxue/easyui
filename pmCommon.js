@@ -1066,17 +1066,6 @@ var editIndex = undefined;//判断表格初始化时是否是编辑状态
                     result.push(datas[u]);
                     continue;
                 };
-                // if(demo.indexOf(datas[u][specialField]) < 0){
-                //     demo.push(datas[u][specialField]);
-                //     var str = {};
-                //     str.title_field = datas[u][specialField];
-                //     var c = $.extend(str, datas[u]);
-                //     result.push(c);
-                //     continue;
-                // }else{
-                //     result.push(datas[u]);
-                //     continue;
-                // };
             };
             if(isTotal){
                 result.push({
@@ -1620,14 +1609,6 @@ var editIndex = undefined;//判断表格初始化时是否是编辑状态
                     idLabel.datagrid('endEdit',editIndex);
                 };
             };
-            // if(!$(e.target).parents().hasClass('datagrid-body') && $(e.target).parents().hasClass('datagrid-header') && ($(e.target).parent()[0].tagName !=  'TD' && $(e.target)[0].tagName ==  'DIV')  || ($(e.target)[0].tagName ==  'BODY' || $(e.target)[0].tagName ==  'HTML')){
-            //     if(Tools.endEditing(idLabel)){
-            //         idLabel.datagrid('endEdit',editIndex);
-            //     };
-            // };
-            // if($(e.target)[0].tagName ==  'DIV' || $(e.target)[0].tagName ==  'BODY' || $(e.target)[0].tagName ==  'HTML'){
-            //
-            // };
         });
         if(isMerges){
             Tools.marginCellFn({
@@ -1637,207 +1618,7 @@ var editIndex = undefined;//判断表格初始化时是否是编辑状态
             });
         };
     };
-    /*
-     * 功能： 获取录入表
-     * 添加人：yangjianxue
-     * 参数：
-     * menuid ：录入表menuid
-     * reportId ： 录入表reportId
-     * id : 录入表 id
-     * isOpera ：是否需要添加操作行
-     * isDefaultRow ：是否需要添加默认数据行 */
-    Tools.initReportInfo = function(obj){
-        var menuid = obj.menuid;
-        var reportId = obj.reportId;
-        var id = obj.id;
-        var isOpera = obj.isOpera == true ? true : false;//是否需要添加操作行
-        var isDefaultRow = obj.isDefaultRow == true ? true : false;//是否需要添加默认数据行
-        var currRpEngineObj = {};
-        $.ajax({
-            url:'/bgt-budget-server/fwRpDesigner/loadRpAll?menuid='+ menuid +'&report_id='+reportId+"&timestamp="+new Date().getTime(),
-            type:'GET',
-            async:false,
-            success:function(data){
-            	if(data){
-                    rpAll = data.data;
-                    // CreateRpWebEngine(rpAll,id,false,0);
-                    var currRpEngine = CreateRpWebEngine(rpAll,id,false,1);
-                    currRpEngineObj = currRpEngine;
-                    var rowIndex = GetDataStartIndex(currRpEngine);//获取数据行开始的行的index
-                    var sheetIndex = currRpEngine.Cell.GetCurSheet();//获取当前表页页号
-                    if(isOpera){//创建操作列
-                        Tools.createOperaHandle({
-                            currRpEngine:currRpEngine,
-                            sheetIndex: sheetIndex,
-                            rowIndex : rowIndex,
-                            isDefaultRow:isDefaultRow
-                        });
-                    }
-                };
-            },
-            error:function(err){
-                console.log(err);
-            }
-        });
-        return currRpEngineObj;
-    };
-    /*
-     * 功能： 创建录入表操作列 及绑定事件
-     * 添加人：yangjianxue
-     * 参数：
-     * currRpEngine ：录入表
-     * sheetIndex : 录入表 sheetIndex
-     * rowIndex : 数据行开始的行的index
-     * isDefaultRow ： 是否需要添加默认数据行*/
-    Tools.createOperaHandle = function(obj){
-
-        var currRpEngine = obj.currRpEngine;
-        var sheetIndex = obj.sheetIndex;
-        var rowIndex = obj.rowIndex;
-        var isDefaultRow = obj.isDefaultRow == true ? true : false;//是否需要添加默认数据行
-        var arr = [];
-        currRpEngine.Cell.InsertCol(1, 1, sheetIndex);//插入列
-        currRpEngine.Cell.MergeCells(1, 1, 1, rowIndex-3); //将操作行的删除和增加合并
-        currRpEngine.Cell.SetCellString(1, 1, sheetIndex, '操作');//标题行添加文字
-        currRpEngine.Cell.SetCellBackColor(1, 1,sheetIndex, currRpEngine.Cell.FindColorIndex(15395562, 1));//设置单元格背景颜色
-        for(var j=1;j<=rowIndex-2;j++){//行---画表格线
-            currRpEngine.Cell.SetCellBorder(1, j,sheetIndex,0,2);
-            currRpEngine.Cell.SetCellBorder(1, j,sheetIndex,1,2);
-            currRpEngine.Cell.SetCellBorder(1, j,sheetIndex,3,2);
-        };
-        currRpEngine.Cell.SetCellBorderClr(1,rowIndex-3, sheetIndex, 1, currRpEngine.Cell.FindColorIndex(16777215, 1));//设置单元边框颜色
-        currRpEngine.Cell.SetButtonCell(1, rowIndex-2, sheetIndex, 'add',1, '',1);//为新增单元格注册事件
-        // currRpEngine.RegistOperaButtonClicked("OperaButtonCellClicked");
-        // alert(currRpEngine.Cell.AddImage("c:\iconBase.png"))
-        // currRpEngine.Cell.SetCellImage(1, rowIndex-2, sheetIndex, 1, 1);//设置背景图片
-        currRpEngine.Cell.SetCellFontSize(1, 1, sheetIndex, 11);//设置字体
-        currRpEngine.Cell.SetCellAlign(1, 1, sheetIndex, 4+32);//垂直居中
-        if(isDefaultRow){
-            arr.push({});
-            currRpEngine.AppendRow(arr);//为表格默认添加一行
-            var initIndex = GetDataStartIndex(currRpEngine);//获取数据起始行的索引
-            currRpEngine.Cell.SetRowHeight(1, 24, initIndex, sheetIndex);//设置行高
-            currRpEngine.Cell.SetButtonCell(1, initIndex, sheetIndex, 'minus',1, '',1);//为删除单元格注册事件
-        };
-        currRpEngine.RegistButtonCellClicked('Tools.operaHandle');
-
-        // currRpEngine.Cell.AddImage("D:\2019_ctj\maven_repo\budget-web\trunk\code\budget-web\src\main\webapp\grp\budget\js\images\tabCirIcon.png");
-        // currRpEngine.Cell.SetCellImage(1, initIndex, 0, currRpEngine.Cell.AddImage('../../images/tabCirIcon.png'), 1);//设置背景图片
-        // currRpEngine.Cell.SetCellBackColor(1, rowIndex, 0, currRpEngine.Cell.FindColorIndex(15395562, 1));
-
-    };
-    /*
-     * 功能： 为录入表操作列
-     * 添加人：yangjianxue
-     * 说明：
-     * 1、在 RpWebEngineBudget.js 中 通过 RegistButtonCellClicked 注册到 cell 的 点击事件（不需自定义，了解即可）
-     * 2、通过 CreateRpWebEngine 创建 cell 返回 cell 对象 currRpEngine（不需自定义，了解即可）
-     * 3、通过 Tools.createOperaHandle 创建操作列，并绑定事件（不需自定义，了解即可）
-     * 4、通过 currRpEngine.RegistButtonCellClicked('Tools.operaHandle') 绑定具体的事件回调（不需自定义，了解即可）
-     * 5、该方法是新增和删除的具体实现*/
-    Tools.operaHandle = function(col, row, sheetindex){
-        //获取当前表格数据行
-        var arrSource = _cacheRpEngine.GetPageData();
-        var initIndex = GetDataStartIndex(_cacheRpEngine);//获取数据起始行索引
-        var type = _cacheRpEngine.Cell.GetBtnCellString(1,row, sheetindex);
-        if(type == 'minus'){
-            // _cacheRpEngine.Cell.DeleteRow(row,1,sheetindex);
-            _cacheRpEngine.DeleteRow(row,1,sheetindex);
-            return;
-        }else if(type == 'add'){
-            //增加
-            _cacheRpEngine.Cell.InsertRow(arrSource.length+initIndex,1,sheetindex);
-            _cacheRpEngine.Cell.SetRowHeight(1, 24, arrSource.length+initIndex, sheetindex);
-            var colNum = _cacheRpEngine.Cell.GetCols(sheetindex);
-            for(var j=arrSource.length+initIndex;j<=arrSource.length+initIndex;j++){//行
-                for(var n = 1;n<colNum;n++){
-                    _cacheRpEngine.Cell.SetCellBorder(n, arrSource.length+initIndex,0,0,2);
-                    _cacheRpEngine.Cell.SetCellBorder(n, arrSource.length+initIndex,0,1,2);
-                    _cacheRpEngine.Cell.SetCellBorder(n, arrSource.length+initIndex,0,3,2);
-                    _cacheRpEngine.Cell.SetCellBorder(n, arrSource.length+initIndex,0,2,2);
-                };
-            };
-            _cacheRpEngine.Cell.SetCellBorderClr(1,2, 0, 1, _cacheRpEngine.Cell.FindColorIndex(16777215, 1));//设置单元边框颜色
-            _cacheRpEngine.Cell.SetButtonCell(1, arrSource.length+initIndex, sheetindex, 'minus',1, '',1);//为删除单元格注册事件
-        };
-    };
-    /*
-     * 功能： 录入表初始化时操作列恢复删除按钮
-     * 添加人：yangjianxue
-     * 说明：
-     * data : cell表格需要渲染的数据
-     * currRpEngine ： 创建的cell表 对象*/
-    Tools.initCellMinusBtn = function(obj){
-        var data = obj.data;
-        var currRpEngine = obj.currRpEngine;
-        currRpEngine.SetData(data);
-        var rowTotalIndex = GetDataStartIndex(currRpEngine) + 1;//获取数据行结束行的index
-        var rowIndex = GetDataStartIndex(currRpEngine);//获取数据行开始的行的index
-        var sheetIndex = currRpEngine.Cell.GetCurSheet();//获取当前表页页号
-        for(var i = rowIndex;i<=rowTotalIndex;i++){
-            currRpEngine.Cell.SetRowHeight(1, 24, i, sheetIndex);//设置行高
-            currRpEngine.Cell.SetButtonCell(1, i, sheetIndex, 'minus',1, '',1);//为删除单元格注册事件
-        };
-        currRpEngine.RegistButtonCellClicked('Tools.operaHandle');
-    }
-    /*
-    * 功能：获取录入表的report_id
-   * 添加人：gaocaiqiong
-   * 参数：
-   * url ：录入表请求路径
-   * id : 录入表 id*/
-    Tools.getRepBillInfo = function(obj){
-        var menuid = obj.menuid;
-        var uiCode = obj.ui_code;
-        $.ajax({
-            url:"/bgt-budget-server/bgtMenu/menuRepBill?menuid="+menuid+"&uiCode="+uiCode+"&timestamp="+new Date().getTime(),
-            type:'GET',
-            async:false,
-            success:function(data){
-                if(data){
-                    btnList = data.uvBtnList;
-                    if(data.repBillMenuReportList&&data.repBillMenuReportList.length>0){
-                        reportId= data.repBillMenuReportList[0].report_id;
-                    }
-                };
-            },
-            error:function(err){
-                console.log(err)
-            }
-
-        })
-    };
-    /*
-     * 功能： 动态获取要素的
-     * 添加人：yangjianxue
-     * 参数：
-     * eleCode  要素简称
-     * levelNum : 要素级次
-     * url：接口 url 非必须参数，*/
-    Tools.callElement = function(obj){
-        var eleCode = obj.eleCode;
-        var storageVal;
-        if(eleCode&&(typeof(eleCode) != "undefined")&& (eleCode != "")){
-        	var levelNum = obj.levelNum;
-            var curData = obj.curData ? obj.curData :'';
-            var menuid = obj.menuid;
-            var url = obj.url ? obj.url : '/bgt-basic-server/bsElement/getDataSourceFilteredData?menuid=' + menuid+"&timestamp="+new Date().getTime()+"&ele_code="+eleCode
-                +"&level_num="+ levelNum;
-            $.ajax({
-                url: url,
-                type: 'POST',
-                async: false,
-                contentType: "application/json;charset=utf-8",
-                success: function(data) {
-                    storageVal = data.data;
-                },
-                error: function(data) {
-                    console.log(data);
-                }
-            });
-        }
-        return storageVal;
-    }
+   
 
     // 总计
     Tools.totalAmountFn = function(obj){
@@ -1862,29 +1643,6 @@ var editIndex = undefined;//判断表格初始化时是否是编辑状态
         resultArr.push(resultObj);
         return resultArr;
     }
-
-    // Tools.treeGridTotal = function(obj){
-    //     var result = obj.result;
-    //     // var isTotal = obj.isTotal == false ? false : true;
-    //     // var totalField = obj.totalField;
-    //     var newObj = {};
-    //     // newObj['footer'][0][totalField] = '合计';
-    //     // if(isTotal){
-    //     //     newObj = {
-    //     //         "total" : datas.length,
-    //     //         "rows" : datas,
-    //     //         "footer":[
-    //     //             {"f1":14000,"f2":12600,"f3":13321,"f4":15281,"f5":14931,"f6":13461,"f7":14126,"f8":12866}
-    //     //         ]
-    //     //     }
-    //     // }
-    //     newObj = {
-    //         "total" : result.length,
-    //         "rows" : result
-    //     };
-    //     return newObj;
-    // }
-
 
 })();
 /*
@@ -1916,13 +1674,7 @@ Array.prototype.removeObj = function(arrVal) {
         }
     });
 };
-// 去重
-// Array.prototype.unique = function(){
-//     var result = [];
-//     this.forEach(function(v){
-//
-//     })
-// }
+
 /*
  * 功能：easyui datagrid 触发编辑单元格
  * 创建人：yangjianxue
@@ -1947,56 +1699,7 @@ $.extend($.fn.datagrid.methods, {
         });
     }
 });
-/*
- * 功能： 基于easyui datagrid 行计算
- * 创建人：yangjianxue
- * 参数：
- * needCalArr ：需要合计的字段
- * idLabel ：表格id/class
- * rowTotal ：行合计的值
- * showField ：需要展示到哪里
- * operatorCal ： 运算符*/
-Tools.rowCalculate = function(obj){
-    var needCalArr = obj.needCalArr;
-    var idLabel = obj.idLabel;
-    var rowTotal = obj.rowTotal;
-    var showField = obj.showField;
-    var operatorCal= obj.operatorCal;
-    var rows = idLabel.datagrid('getRows');
-    if(operatorCal == '+' || operatorCal == '-'){
-       for(var j = 0; j < rows.length; j++) {
-        rowTotal[j] = 0;
-       };
-    };
-    if(operatorCal == '*' || operatorCal == '/'){
-       for(var j = 0; j < rows.length; j++) {
-        rowTotal[j] = 1;
-       };
-    };
-   for(var i = 0;i<rows.length;i++){
-       for(var j=0;j<needCalArr.length;j++){
-           switch (operatorCal){
-               case '+':
-                 rowTotal[i] += (rows[i][needCalArr[j]] ? parseFloat(rows[i][needCalArr[j]]) : 0);
-                 break;
-               case '-':
-                 rowTotal[i] -= (rows[i][needCalArr[j]] ? parseFloat(rows[i][needCalArr[j]]) : 0);
-                 break;
-               case '*':
-                 rowTotal[i] *= (rows[i][needCalArr[j]] ? parseFloat(rows[i][needCalArr[j]]) : 0);
-                 break;
-               case '/':
-                 rowTotal[i] /= (rows[i][needCalArr[j]] ? parseFloat(rows[i][needCalArr[j]]) : 0);
-                 break;
-           };
-       };
-   };
-    //为行合计赋值
-    for(var z = 0; z < rows.length; z++) {
-        idLabel.datagrid('getRows')[z][showField] = rowTotal[z];
-        idLabel.datagrid('refreshRow', z);
-    };
-};
+
 /*
  * 功能：easyui datagrid 扩展编辑单元格方法
  * 创建人：yangjianxue
@@ -2245,19 +1948,6 @@ function clickRow(index, row) {
     }
 
 }
-//显示报错数据
-function dataGridErr() {
-    new Tools.popUp({
-        title: '提示信息',
-        messTxt: '加载出错！',
-        iconType: 'tipIcon',
-        isSingleBtn :  true ,
-        suffix : 'd',
-        closeCallBack: function (closeEvent) {
-            closeEvent();
-        }
-    })
-}
 /** resultOriginal:后台请求的数据
  * id:选择器
  * resultList:最后的结果集;
@@ -2361,13 +2051,7 @@ function diff(obj1,obj2){
     }
     return true;
 };
-//修改合并对象;
-function joinObject(originalObj,nowObj){
-    for (var i =0;i<nowObj.length;i++) {
-        originalObj[nowObj[i].name] = nowObj[i].value;
-    }
-    return originalObj;
-}
+
 //form表单返回对象方法封装；使用方法eg:$("form").serializeArray();
 $.prototype.serializeObject = function () {
     var a,o,h,i,e;
@@ -2382,31 +2066,7 @@ $.prototype.serializeObject = function () {
     }
     return o;
 }
-//加载年度按钮
-function returnYear(menuid) {
-//定义一个承接变量
-    var undertake = 0;
-    $.ajax({
-        url :"/framework-server/busiyear/list?menuid="+menuid,
-        type : "POST",
-        async:false,
-        contentType: "application/json;charset=utf-8",
-        success : function (data) {
-            //默认加载is_default==1
-            for (var i=0; i<data.length;i++){
-                if(data[i].is_default == 1){
-                    undertake = data[i].year;
-                }
-            }
-        },
-        error:function(err){
-            console.log(err)
-        }
-    });
-    return undertake;
-}
 //克隆
-//复制对象的数值方法
 function clone(obj) {
     var o, i, j, k;
     if(typeof(obj) != "object" || obj === null) return obj;
@@ -2433,197 +2093,7 @@ function clone(obj) {
     }
     return o;
 };
-/**
- * 获取父节点下面所有的字节点id字符串; 默认拼接code值,2为id
- * @param {treeId} 树的id
- * @param {nodeTree} 选择的节点;
- */
-function getChildren(treeId,nodeTree,differentParam){
-    var fileParameter = 'CODE';
-    if(differentParam==2){
-        fileParameter='id';
-    }
-    var idList =  new Array();
-        //如果选择的部门,把单位code值传给后台;
-//	if(nodeTree.IS_LEAF=='1'){
-//		idString=nodeTree[fileParameter];
-//		return idString;
-//	}
-        $tree = $(treeId),
-        node = $tree.tree('find',nodeTree.id),
-        childrenNodes = $tree.tree('getChildren',node.target);
-    //如果childrenNodes没有子集,为空,证明是最下面一个,然后把值返回去;
-    if(childrenNodes == "" || childrenNodes == null){
-        idList.push(nodeTree[fileParameter]);
-        return idList;
-    };
-    var count =0;
-    for(var i = 0; i < childrenNodes.length; i++){
-        if(childrenNodes[i].IS_LEAF=='1'){
-            count++;
-            if(count == 1){
-                idList.push(childrenNodes[i][fileParameter]);
-            }else{
-                idList.push(childrenNodes[i][fileParameter]);
-                //idString += ","+childrenNodes[i][fileParameter];
-            };
-        };
-    };
-    return idList;
-};
-//分组数据============================================================
-/*
- * datas初始数据
- * specialField合并字段
- * treeField树字段名称
- * treeFieldCode树字段编码
- */
-function groupData(obj) {
-    datas = obj.datas;
-    var specialField = obj.specialField;
-    var treeField = obj.treeField;
-    var treeFieldCode = obj.treeFieldCode;
-    var titleFieldArr = obj.titleFieldArr;
-    var isDefaultRow = obj.isDefaultRow == false ? false : true;
-    var result = [];
-    if(specialField){
-        var newTitleFieldArr = JSON.parse(JSON.stringify(titleFieldArr));
-        for(var m = 0;m<titleFieldArr.length;m++){
-            var str = newTitleFieldArr[m];
-            str.title_field = titleFieldArr[m][specialField];
-            result.push(str);
-            if(datas && datas.length > 0) {
-                for(var n = 0;n<datas.length;n++){
-                    if(datas[n][specialField] == titleFieldArr[m][specialField]){
-                        datas[n][parent] = titleFieldArr[m][specialFieldCode]
-                        result.push(datas[n])
-                    };
-                };
-            }else if(isDefaultRow){
-                result.push(titleFieldArr[m]);
-            };
-        };
-        return result;
-    }
-}
 
-
-//校验数据
-/**
- * data原始数据
- * groupFied分组数据array
- * treeFied树形展示数据obj
- */
-function verifyOffRecetion(list, fn,obj,parentFile) {
-    const groups = {};
-    list.forEach(function (o) {
-        const group = JSON.stringify(fn(o));
-        groups[group] = groups[group] || [];
-        groups[group].push(o);
-    });
-    return  group(groups,obj,parentFile);
-}
-// function group(groups,obj,parentFile) {
-//     var code = obj.code;
-//     var name  = obj.name;
-//     var codeg = obj.codeg;
-//     var nameg  = obj.nameg;
-//     var parentCode = obj.parentCode;
-//     var returnlist = new Array();
-//    var  keycache = 0;
-//    for(var key in groups){
-//        var filed  = {};
-//        filed[codeg]  =  groups[key][0][codeg]
-//        filed[nameg]  = groups[key][0][nameg]
-//        filed[name] = groups[key][0][name];
-//        filed[code] = groups[key][0][code];
-//        returnlist.push(filed);
-//        for(var i=0;i<groups[key].length;i++){
-//            if(parentFile){
-//                groups[key][i]._parentId = groups[key][i][parentCode];
-//                groups[key][i][parentCode] = "";
-//                returnlist.push(groups[key][i]);
-//            }else{
-//                returnlist.push(groups[key][i]);
-//           }
-//        }
-//
-//
-//    }
-//    return returnlist;
-// }
-//=========================
-
-// function  groupBy(array, f){
-//     const groups = {};
-//     array.forEach(function (o) {
-//         const group = JSON.stringify(f(o));
-//         groups[group] = groups[group] || [];
-//         groups[group].push(o);
-//     });
-//      return groups;
-// }
-//
-// function groupBy(data,fileData) {
-//     var retrunList =[];
-//     var cacheList =[];
-//     for(var i =0;i<fileData.length;i++){
-//        for(var x=0;x<data.length;x++) {
-//                var obj ={};
-//                if(retrunList.length == 0){
-//                    obj[fileData[i]] = data[x][fileData[i]];
-//                    cacheList.push(obj);//作缓存的数据
-//                    retrunList.push(obj);//真正返回的数据
-//                }else{
-//                    for(var y = 0 ;y<cacheList.length;y++){
-//                        //相同等级比较
-//                      if(cacheList[y][fileData[i]]==data[x][fileData[i]]){
-//                          if(cacheList[y][fileData[i+1]]){
-//                              if(cacheList[y][fileData[i+1]] != data[x][fileData[i+1]]){
-//                                  obj[fileData[i]] = data[x][fileData[i]];
-//                                  obj[fileData[i+1]] = data[x][fileData[i+1]];
-//                                  cacheList.splice(y, 0,obj);
-//                                  retrunList.splice(y, 0,obj);
-//                              }
-//                          }else{
-//                              if(!cacheList[y+1][fileData[i]]){
-//                                  if(cacheList[y+1][fileData[i]]!= cacheList[y][fileData[i]]){
-//                                      obj[fileData[i]] = data[x][fileData[i]];
-//                                      obj[fileData[i+1]] = data[x][fileData[i+1]];
-//                                      cacheList.splice(y, 0,obj);
-//                                      retrunList.splice(y, 0,obj);
-//                                  }
-//                              }
-//                          }
-//                      }else{
-//                          //等级不同的比较
-//                          obj[fileData[i]] = data[x][fileData[i]];
-//                          cacheList.push(obj);
-//                          retrunList.push(obj);
-//                      }
-//                    }
-//               }
-//        }
-//     }
-//     return retrunList;
-// }
-//判断是否在本岗
-function isThisJobs(obj){
-	var menuid = obj.meunid;
-	var agency_id = obj.agency_id;
-	var ui_code = obj.ui_code;
-	var isJob;
-	$.ajax({
-		url:'/bgt-budget-server/bgtMenu/menuIsCanCancel?menuid='+menuid+'&agency_id='+agency_id+'&ui_code='+ui_code+"&timestamp="+new Date().getTime(),
-		type:'GET',
-		async:false,
-		success:function(data){
-            // 数据是否可撤销:0,可编辑;1,可撤销;2,不可编辑也不可撤销
-			isJob = data.data;
-		}
-	});
-	return isJob;
-}
 //自适应高度
 function resizeHength(id,hength){
 	if(!hength){
